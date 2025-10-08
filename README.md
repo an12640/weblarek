@@ -183,3 +183,5 @@ interface ICustomer {
 `setEmail(email: string): void` - сохранение данных только об email адресе покупателя
 `setPhone(phone: string): void` - сохранение данных только о номере телефона покупателя
 `clear(): void` - очистка данных покупателя
+
+## Слой коммуникации
