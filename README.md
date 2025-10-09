@@ -66,7 +66,7 @@ Presenter - презентер содержит основную логику п
 `container: HTMLElement` - поле для хранения корневого DOM элемента компонента.
 
 Методы класса:  
-`render(data?: Partial<T>): HTMLElement` - Главный метод класса. Он принимает данные, которые необходимо отобразить в интерфейсе, записывает эти данные в поля класса и возвращает ссылку на DOM-элемент. Предполагается, что в классах, которые будут наследоваться от `Component` будут реализованы сеттеры для полей с данными, которые будут вызываться в момент вызова `render` и записывать данные в необходимые DOM элементы.  
+`render(data?: Partial<T>): HTMLElement` - Главный метод класса. Он принимает данные, которые необходимо отобразить в интерфейсе, записывает эти данные в поля класса и возвращает ссылку на DOM-элемент. Предполагается, что в классах, которые будут наследоваться от `Component` будут реализованы сеттеры для полей с данными, которые будут вызываться в момент вызова `render` и записывать данные в необходимые DOM элементы.
 `setImage(element: HTMLImageElement, src: string, alt?: string): void` - утилитарный метод для модификации DOM-элементов `<img>`
 
 
@@ -104,8 +104,9 @@ Presenter - презентер содержит основную логику п
 ### Товар
 
 Интерфейс IProduct необходим для учёта товаров, которые будут использоваться в приложении.
-Он содержит в чебе уникальный идентификатор (id), название (title), описание (description), категорию (category), изображение карточки товара (image) и стоимость (price).
+Он содержит в cебе уникальный идентификатор (id), название (title), описание (description), категорию (category), изображение карточки товара (image) и стоимость (price).
 
+```
 interface IProduct {
   id: string;
   description: string;
@@ -114,16 +115,19 @@ interface IProduct {
   category: string;
   price: number | null;
 }
+```
 
 ### Покупатель
 Интерфейс ICustomer описывает данные покупателя, которые вводятся при оформлении заказа: способ оплаты (payment), адрес доставки (address), email (email) и телефон (phone).
 
+```
 interface ICustomer {
   payment: 'card' | 'cash' | '';
   email: string;
   phone: string;
   address: string;
 }
+```
 
 ## Модели данных
 
@@ -134,13 +138,18 @@ interface ICustomer {
 
 Поля класса:  
 `items: IProduct[]` — массив товаров
+
 `selectedProduct: IProduct | null` — выбранная карточка товара
 
 Методы: 
 `getProducts(): IProduct[]` — возвращает массив всех товаров
+
 `setProducts(products: IProduct[]): void` — сохраняет массив товаров
+
 `getSelectedProduct(): IProduct | null` — возвращает выбранную карточку товара c подробным описанием
+
 `setSelectedProduct(product: IProduct): void` — сохраняет выбранную карточку товара
+
 `getProductById(id: string): IProduct | undefined` - метод для получения одного товара по его id
 
 ### Корзина с товарами - ShoppingCart
@@ -151,11 +160,17 @@ interface ICustomer {
 
 Методы: 
 `addItem(product: IProduct): void` — добавляет товар в корзину
+
 `removeItem(product: IProduct): void` — удаляет товар из корзины
+
 `getCount(): number` — возвращает количество товаров в корзине
+
 `getItems(): IProduct[]` — возвращает список товаров в корзине
+
 `getTotalPrice(): number` — возвращает сумму стоимости товаров
+
 `hasItem(id: string): boolean` — проверяет наличие товара в корзине по id
+
 `clear(): void` - очистка корзины
 
 ### Покупатель - Customer
@@ -169,19 +184,44 @@ interface ICustomer {
 
 Методы: 
 `validateData(): Record<string, string>` — проверка данных покупателя. Метод возвращает объект, где могут присутствовать поля, соответствующие полям класса, значениями у которых будет текст ошибки. Если же поле не содержит ошибок, то такое свойство в объекте может отсутствовать
+
 `getData(): ICustomer` — получение всех данных покупателя
 
-<--- понять нужен ли один общий getData или разные поля для сохранения данных 
-`getPayment(payment: TPayment | null): void` - сохранение данных только о типе оплаты
-`getAddress(address: string): void` - сохранение данных только об адресе покупателя
-`getEmail(email: string): void` - сохранение данных только об email адресе покупателя
-`getPhone(phone: string): void` - сохранение данных только о номере телефона покупателя
---->
-
 `setPayment(payment: TPayment | null): void` - сохранение данных только о типе оплаты
+
 `setAddress(address: string): void` - сохранение данных только об адресе покупателя
+
 `setEmail(email: string): void` - сохранение данных только об email адресе покупателя
+
 `setPhone(phone: string): void` - сохранение данных только о номере телефона покупателя
+
 `clear(): void` - очистка данных покупателя
 
 ## Слой коммуникации
+
+NetworkManager - класс, который использует композицию, чтобы выполнить запрос на сервер с помощью метода get класса Api, а также получает с сервера объект с массивом товаров
+
+Поля класса:
+`api: IApi` - объект типа IApi, который включает в себя методы get и post, позволяющие отправлять http запросы на сервер
+
+Конструктор: 
+Принимает в качестве параметра `api: IApi` любой объект, соответствующий этому интерфейсу. В нашем случае это будет экземпляр класса `Api`
+
+Методы:
+`getProducts(): Promise<IProduct[]>` - выполняет GET-запрос к /product/ и возвращает массив товаров
+
+`createOrder(order: IOrder): Promise<IOrder>` - выполняет POST-запрос к /order/ и отправляет данные заказа
+
+Тип `IOrder` описывает данные заказа
+
+```
+interface IOrder {
+  payment: TPayment;
+  address: string;
+  email: string;
+  phone: string;
+  total: number;
+  items: TProductId[];
+}
+```
+

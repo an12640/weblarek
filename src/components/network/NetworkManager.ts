@@ -14,6 +14,4 @@ export class NetworkManager {
   createOrder(order: IOrder): Promise<IOrder> {
     return this.api.post('/order/', order);
   }
-  
-  
 }

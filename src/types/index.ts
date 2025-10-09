@@ -31,8 +31,3 @@ export interface IOrder {
   items: TProductId[];
 }
 
-export interface IOrderResponse {
-
-
-}
-
