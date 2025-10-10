@@ -18,6 +18,10 @@ export interface IProduct {
     category: string;
     price: number | null;
 }
+export interface IProductResponse {
+    total: number;
+    items: IProduct[];
+}
 
 export interface ICustomer {
     payment: TPayment;
@@ -26,11 +30,12 @@ export interface ICustomer {
     address: string;
 }
 
-export interface IOrder {
-    payment: TPayment;
-    address: string;
-    email: string;
-    phone: string;
+export interface IOrder extends ICustomer {
     total: number;
     items: TProductId[];
+}
+
+export interface IOrderResponse {
+    id: string;
+    total: number;
 }

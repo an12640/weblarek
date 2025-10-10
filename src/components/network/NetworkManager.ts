@@ -1,4 +1,4 @@
-import { IApi, IOrder, IProduct } from "../../types";
+import { IApi, IOrder, IProductResponse, IOrderResponse} from "../../types";
 
 export class NetworkManager {
     api: IApi;
@@ -7,11 +7,11 @@ export class NetworkManager {
         this.api = api;
     }
 
-    getProducts(): Promise<IProduct[]> {
+    getProducts(): Promise<IProductResponse> {
         return this.api.get("/product/");
     }
 
-    createOrder(order: IOrder): Promise<IOrder> {
+    createOrder(order: IOrder): Promise<IOrderResponse> {
         return this.api.post("/order/", order);
     }
 }

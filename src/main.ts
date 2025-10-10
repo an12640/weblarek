@@ -59,7 +59,11 @@ const manager = new NetworkManager(new Api(API_URL));
 
 manager
     .getProducts()
-    .then((products) => console.log("Получены продукты:", products))
+    .then((response) => {
+        catalog.setProducts(response.items); 
+        console.log("Ответ с сервера:", response);
+        console.log("Каталог после получения с сервера:", catalog.getProducts());
+    })
     .catch((err) => console.error("Ошибка при получении товаров", err));
 
 const order: IOrder = {
@@ -73,5 +77,5 @@ const order: IOrder = {
 
 manager
     .createOrder(order)
-    .then((order) => console.log("Создан заказ:", order))
+    .then((result) => console.log("Создан заказ:", result))
     .catch((err) => console.error("Ошибка при создании заказа", err));

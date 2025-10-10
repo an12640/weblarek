@@ -1,4 +1,5 @@
 import { ICustomer, TPayment } from "../../types";
+type TCustomerErrors = Partial<Record<keyof ICustomer, string>>;
 
 export class Customer {
     payment: TPayment | null = null;
@@ -38,8 +39,8 @@ export class Customer {
         this.phone = "";
     }
 
-    validateData(): Record<string, string> {
-        const errors: Record<string, string> = {};
+    validateData(): TCustomerErrors {
+        const errors: TCustomerErrors = {};
         if (!this.payment) errors.payment = "Не выбран вид оплаты";
         if (!this.address) errors.address = "Укажите адрес доставки";
         if (!this.email) errors.email = "Укажите email";

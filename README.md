@@ -210,20 +210,16 @@ NetworkManager - класс, который использует компози�
 Принимает в качестве параметра `api: IApi` любой объект, соответствующий этому интерфейсу. В нашем случае это будет экземпляр класса `Api`
 
 Методы:
-`getProducts(): Promise<IProduct[]>` - выполняет GET-запрос к /product/ и возвращает массив товаров
+`getProducts(): Promise<IProductResponse>` - выполняет GET-запрос к /product/ и возвращает массив товаров
 
-`createOrder(order: IOrder): Promise<IOrder>` - выполняет POST-запрос к /order/ и отправляет данные заказа
+`createOrder(order: IOrder): Promise<IOrderResponse>` - выполняет POST-запрос к /order/ и отправляет данные заказа
 
 Тип `IOrder` описывает данные заказа
 
 ```
-interface IOrder {
-  payment: TPayment;
-  address: string;
-  email: string;
-  phone: string;
-  total: number;
-  items: TProductId[];
+interface IOrder extends ICustomer {
+    total: number;
+    items: TProductId[];
 }
 ```
 
