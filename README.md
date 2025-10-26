@@ -223,3 +223,13 @@ interface IOrder extends ICustomer {
 }
 ```
 
+# Классы слоя Представления (View)
+
+`Component`
+Базовый класс для всех компонентов. Хранит ссылку на DOM-элемент, содержит методы для обновления содержимого, добавления обработчиков и рендера
+`container: HTMLElement`
+`render(data?: partial<T>): HTMLElement`
+`setImage(element: HTMLElement, src: string, alt?: string): void`
+
+Класс `header`
+`set counter(value: number)`
