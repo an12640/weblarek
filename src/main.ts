@@ -8,10 +8,16 @@ import { Api } from "./components/base/Api";
 import { IOrder } from "./types";
 import { NetworkManager } from "./components/network/NetworkManager";
 import { API_URL } from "./utils/constants";
+import { EventEmitter } from "./components/base/Events";
+import { cloneTemplate, ensureElement } from "./utils/utils";
+import { Gallery } from "./components/views/Gallery";
+import { CardCatalog } from "./components/views/Card/CardCatalog";
 
-const catalog = new ProductCatalog();
-const cart = new ShoppingCart();
-const customer = new Customer();
+export const events = new EventEmitter();
+
+const catalog = new ProductCatalog(events);
+const cart = new ShoppingCart(events);
+const customer = new Customer(events);
 
 // Проверка каталога
 catalog.setProducts(apiProducts.items);
@@ -79,3 +85,27 @@ manager
     .createOrder(order)
     .then((result) => console.log("Создан заказ:", result))
     .catch((err) => console.error("Ошибка при создании заказа", err));
+
+const gallery = new Gallery(ensureElement<HTMLElement>('.gallery'), events);
+const cardCatalogTemplate = ensureElement<HTMLTemplateElement>('#card-catalog');
+
+events.on('catalog:changed', () => {
+    const itemCards = catalog.getProducts().map((item => {
+        
+        console.log('Данные для карточки:', item); 
+
+        const card = new CardCatalog(cloneTemplate(cardCatalogTemplate), {
+            onClick: () => events.emit('card:select', item),
+        });
+        return card.render(item);
+    }));
+
+    gallery.render({catalog:itemCards});
+});
+
+events.on('card:select', () => {
+
+});
+
+events.on('cart:updated', () => {
+});

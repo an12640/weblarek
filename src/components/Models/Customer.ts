@@ -1,11 +1,18 @@
 import { ICustomer, TPayment } from "../../types";
+import { EventEmitter } from "../base/Events";
 type TCustomerErrors = Partial<Record<keyof ICustomer, string>>;
 
-export class Customer {
+export class Customer {    
     payment: TPayment | null = null;
     address: string = "";
     email: string = "";
     phone: string = "";
+
+    protected events: EventEmitter;
+
+    constructor(events: EventEmitter) {
+        this.events = events;
+    }
 
     setPayment(payment: TPayment | null): void {
         this.payment = payment;

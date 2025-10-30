@@ -1,14 +1,22 @@
 import { IProduct } from "../../types";
+import { EventEmitter } from "../base/Events";
 
 export class ShoppingCart {
     items: IProduct[] = [];
 
+    protected events: EventEmitter;
+    
+    constructor(events: EventEmitter) {
+        this.events = events;
+    }
+    
     getItems(): IProduct[] {
         return this.items;
     }
 
     addItem(product: IProduct): void {
         this.items.push(product);
+        this.events.emit('cart:updated');
     }
 
     removeItem(product: IProduct): void {

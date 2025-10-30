@@ -1,15 +1,23 @@
 import { IProduct } from "../../types";
+import { EventEmitter } from "../base/Events";
 
 export class ProductCatalog {
     products: IProduct[] = [];
     selectedProduct: IProduct | null = null;
 
+    protected events: EventEmitter;
+    
+    constructor(events: EventEmitter) {
+        this.events = events;
+    }
+    
     getProducts(): IProduct[] {
         return this.products;
     }
 
     setProducts(products: IProduct[]): void {
         this.products = products;
+        this.events.emit('catalog:changed');
     }
 
     getProductById(id: string): IProduct | undefined {
