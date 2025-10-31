@@ -21,6 +21,7 @@ export class ShoppingCart {
 
     removeItem(product: IProduct): void {
         this.items = this.items.filter((item) => item.id !== product.id);
+        this.events.emit('cart:updated');
     }
 
     clear(): void {

@@ -3,62 +3,25 @@ import "./scss/styles.scss";
 import { ProductCatalog } from "./components/models/ProductCatalog";
 import { ShoppingCart } from "./components/models/ShoppingCart";
 import { Customer } from "./components/models/Customer";
-import { apiProducts } from "./utils/data";
 import { Api } from "./components/base/Api";
-import { IOrder } from "./types";
 import { NetworkManager } from "./components/network/NetworkManager";
 import { API_URL } from "./utils/constants";
 import { EventEmitter } from "./components/base/Events";
 import { cloneTemplate, ensureElement } from "./utils/utils";
 import { Gallery } from "./components/views/Gallery";
 import { CardCatalog } from "./components/views/Card/CardCatalog";
+import { Modal } from "./components/views/Modal";
+import { CardModal } from "./components/views/Card/CardModal";
+import { Cart } from "./components/views/Cart";
+import { CartItem } from "./components/views/Card/CartItem";
+import { Header } from "./components/views/Header";
+import { IProduct } from "./types";
 
 export const events = new EventEmitter();
 
 const catalog = new ProductCatalog(events);
 const cart = new ShoppingCart(events);
 const customer = new Customer(events);
-
-// Проверка каталога
-catalog.setProducts(apiProducts.items);
-console.log("Все товары:", catalog.getProducts());
-const selectedProduct = catalog.getProductById(
-    "854cef69-976d-4c2a-a18c-2aa45046c390",
-);
-console.log("Товар по id:", selectedProduct);
-if (selectedProduct) {
-    catalog.setSelectedProduct(selectedProduct);
-}
-console.log("выбранный продукт:", catalog.getSelectedProduct());
-
-// Проверка корзины
-cart.addItem(apiProducts.items[0]);
-console.log("Корзина:", cart.getItems());
-console.log("Сумма:", cart.getTotalPrice());
-console.log("Есть ли первый элемент:", cart.hasItem(apiProducts.items[0].id));
-cart.clear();
-console.log("Текущее кол-во после тотальной очистки", cart.getCount());
-console.log(
-    "Есть ли несуществующий элемент",
-    cart.hasItem(apiProducts.items[3].id),
-);
-cart.addItem(apiProducts.items[1]);
-cart.addItem(apiProducts.items[2]);
-console.log("Текущее кол-во", cart.getCount());
-cart.removeItem(apiProducts.items[2]);
-console.log("Текущее кол-во после удаления одного элемента", cart.getCount());
-
-// Проверка покупателя
-customer.setAddress("kolotuskina");
-console.log("Данные покупателя:", customer.getData());
-console.log("Ошибки валидации:", customer.validateData());
-customer.clear();
-console.log("Данные покупателя после очистки:", customer.getData());
-customer.setAddress("kolotuskina");
-customer.setEmail("test@mail.com");
-customer.setPhone("1234567890");
-customer.setPayment("cash");
-console.log("Данные покупателя:", customer.getData());
 
 // Проверка api
 const manager = new NetworkManager(new Api(API_URL));
@@ -72,22 +35,79 @@ manager
     })
     .catch((err) => console.error("Ошибка при получении товаров", err));
 
-const order: IOrder = {
-    payment: "cash",
-    address: customer.address,
-    email: customer.email,
-    phone: customer.phone,
-    total: cart.getTotalPrice(),
-    items: cart.getItems().map((item) => item.id),
-};
+// const order: IOrder = {
+//     payment: "cash",
+//     address: customer.address,
+//     email: customer.email,
+//     phone: customer.phone,
+//     total: cart.getTotalPrice(),
+//     items: cart.getItems().map((item) => item.id),
+// };
 
-manager
-    .createOrder(order)
-    .then((result) => console.log("Создан заказ:", result))
-    .catch((err) => console.error("Ошибка при создании заказа", err));
+// manager
+//     .createOrder(order)
+//     .then((result) => console.log("Создан заказ:", result))
+//     .catch((err) => console.error("Ошибка при создании заказа", err));
 
 const gallery = new Gallery(ensureElement<HTMLElement>('.gallery'), events);
 const cardCatalogTemplate = ensureElement<HTMLTemplateElement>('#card-catalog');
+
+const modalContainer = ensureElement<HTMLElement>('#modal-container');
+const modal = new Modal(modalContainer, events, {
+    onClose: () => {
+        modal.close();
+        events.emit('modal:close');
+    }
+});
+
+const cardPreviewTemplate = ensureElement<HTMLTemplateElement>('#card-preview');
+
+const basketBtn = ensureElement<HTMLButtonElement>(".header__basket");
+const basketTemplate = ensureElement<HTMLTemplateElement>("#basket");
+const basketItemTemplate = ensureElement<HTMLTemplateElement>("#card-basket");
+
+const header = new Header(ensureElement<HTMLElement>(".header"));
+
+const cartView = new Cart(cloneTemplate(basketTemplate), {
+        onCheckout: () => events.emit("cart:checkout"),
+    });
+
+function renderCart(
+  cartView: Cart,
+  basketItemTemplate: HTMLTemplateElement,
+) {
+  if (cart.getCount() === 0) {
+    cartView.render({
+      items: [],
+      total: cart.getTotalPrice(),
+    });
+    return;
+  }
+
+  const items = cart.getItems().map((product, index) => {
+    const item = new CartItem(cloneTemplate(basketItemTemplate), {
+      onRemove: () => events.emit('cart:removeItem', { id: product.id }),
+    });
+    return item.render({
+      title: product.title,
+      price: product.price ?? null,
+      index: index + 1,
+    });
+  });
+
+  cartView.render({
+    items,
+    total: cart.getTotalPrice(),
+  });
+}
+
+basketBtn.addEventListener("click", () => {
+
+    renderCart(cartView, basketItemTemplate);
+
+    modal.content = cartView.container;
+    modal.open();
+});
 
 events.on('catalog:changed', () => {
     const itemCards = catalog.getProducts().map((item => {
@@ -103,9 +123,30 @@ events.on('catalog:changed', () => {
     gallery.render({catalog:itemCards});
 });
 
-events.on('card:select', () => {
+events.on('card:select', (item: IProduct) => {
+    const inCart = cart.hasItem(item.id);
 
+    const cardModalView = new CardModal(cloneTemplate(cardPreviewTemplate), {
+        onToggleCart: () => {
+            if (inCart) {
+                cart.removeItem(item);
+            } else {
+                cart.addItem(item);
+            }
+            modal.close();
+        },
+  });
+
+  cardModalView.render(item);
+  modal.content = cardModalView.container;
+  modal.open();
 });
 
 events.on('cart:updated', () => {
+    header.render({count:cart.getCount()});
+    renderCart(cartView, basketItemTemplate);
+});
+
+events.on('cart:removeItem', (item: IProduct) => {
+    cart.removeItem(item);
 });
