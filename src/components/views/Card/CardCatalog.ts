@@ -1,5 +1,5 @@
 import { IProduct } from "../../../types";
-import { categoryMap, CDN_URL } from "../../../utils/constants";
+import { categoryMap } from "../../../utils/constants";
 import { ensureElement } from "../../../utils/utils";
 import { Card } from "./Card";
 

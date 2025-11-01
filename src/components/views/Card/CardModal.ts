@@ -10,18 +10,21 @@ export interface ICardModalActions {
   onToggleCart?: () => void;
 }
 
-export class CardModal extends Card<Partial<IProduct>> {
+interface ICartModal {
+    item: Partial<IProduct>;
+    isInCart: boolean;
+    price : number | null
+}
+
+export class CardModal extends Card<ICartModal> {
     protected _category: HTMLElement;
     protected _image: HTMLImageElement;
-    protected _description: HTMLElement; // Уникальное поле
+    protected _description: HTMLElement;
     protected _button: HTMLButtonElement;
-    container: HTMLElement;
 
     constructor(container: HTMLElement, actions?: ICardModalActions) {
-        super(container); // Вызываем конструктор родителя
-        this.container = container;
+        super(container);
 
-        // Находим все необходимые элементы
         this._category = ensureElement<HTMLElement>('.card__category', container);
         this._image = ensureElement<HTMLImageElement>('.card__image', container);
         this._description = ensureElement<HTMLElement>('.card__text', container);
@@ -51,5 +54,21 @@ export class CardModal extends Card<Partial<IProduct>> {
     
     set description(value: string) {
         this._description.textContent = value;
+    }
+
+    set item(item: Partial<IProduct>) {
+        this.image = item.image!;
+        this.category = item.category!;
+        this.description = item.description!;
+        this.price = item.price!;
+        this.title = item.title!;
+        
+        if (item.price === null) {
+            this._button.disabled = true;
+        }
+    }
+
+    set isInCart(value: boolean) {
+        this._button.textContent = value ? 'Удалить из корзины' : 'Купить';
     }
 }

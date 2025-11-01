@@ -13,7 +13,6 @@ interface ICart {
 }
 
 export class Cart extends Component<ICart>{
-  public readonly container: HTMLElement;
   private listEl: HTMLUListElement;
   private totalEl: HTMLElement;
   private checkoutBtn: HTMLButtonElement;
@@ -21,7 +20,6 @@ export class Cart extends Component<ICart>{
   constructor(container: HTMLElement, actions?: ICartActions) {
     super(container);
 
-    this.container = container;
     this.listEl = ensureElement<HTMLUListElement>(".basket__list", container);
     this.totalEl = ensureElement<HTMLElement>(".basket__price", container);
     this.checkoutBtn = ensureElement<HTMLButtonElement>(".basket__button", container);

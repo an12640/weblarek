@@ -1,6 +1,9 @@
 import { ICustomer, TPayment } from "../../types";
 import { EventEmitter } from "../base/Events";
-type TCustomerErrors = Partial<Record<keyof ICustomer, string>>;
+
+export type TCustomerErrors = Partial<Record<keyof ICustomer, string>>;
+export type TOrderErrors = Pick<TCustomerErrors, 'payment' | 'address'>;
+export type TContactsErrors = Pick<TCustomerErrors, 'email' | 'phone'>;
 
 export class Customer {    
     payment: TPayment | null = null;
@@ -14,20 +17,23 @@ export class Customer {
         this.events = events;
     }
 
-    setPayment(payment: TPayment | null): void {
-        this.payment = payment;
-    }
-
-    setAddress(address: string): void {
-        this.address = address;
-    }
-
-    setEmail(email: string): void {
-        this.email = email;
-    }
-
-    setPhone(phone: string): void {
-        this.phone = phone;
+    setData(data: Partial<ICustomer>) {
+        if (data.payment) {
+            this.payment = data.payment;
+            this.events.emit('checkout:orderUpdated');
+        }
+        if (data.address) {
+            this.address = data.address;
+            this.events.emit('checkout:orderUpdated');
+        }
+        if (data.email) {
+            this.email = data.email;
+            this.events.emit('checkout:contactsUpdated');
+        }
+        if (data.phone) {
+            this.phone = data.phone;
+            this.events.emit('checkout:contactsUpdated');
+        }
     }
 
     getData(): ICustomer {
@@ -50,6 +56,20 @@ export class Customer {
         const errors: TCustomerErrors = {};
         if (!this.payment) errors.payment = "Не выбран вид оплаты";
         if (!this.address) errors.address = "Укажите адрес доставки";
+        if (!this.email) errors.email = "Укажите email";
+        if (!this.phone) errors.phone = "Укажите телефон";
+        return errors;
+    }
+
+    validateOrder(): TOrderErrors {
+        const errors: TOrderErrors = {};
+        if (!this.payment) errors.payment = "Не выбран вид оплаты";
+        if (!this.address) errors.address = "Укажите адрес доставки";
+        return errors;
+    }
+
+    validateContacts(): TContactsErrors {
+        const errors: TContactsErrors = {};
         if (!this.email) errors.email = "Укажите email";
         if (!this.phone) errors.phone = "Укажите телефон";
         return errors;
