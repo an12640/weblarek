@@ -1,3 +1,4 @@
+import { TPrice } from "../../../types";
 import { ensureElement } from "../../../utils/utils";
 import { Card } from "./Card";
 
@@ -7,7 +8,7 @@ export interface ICartItemActions {
 
 interface ICartItem {
     title: string;
-    price: number | null;
+    price: TPrice;
     index: number;
 }
 

@@ -173,7 +173,14 @@ events.on("catalog:changed", () => {
 
 events.on("catalog:selectItem", (item: IProduct) => {
     const inCart = cart.hasItem(item.id);
-
+    let buttonText = "";
+    if (item.price === null) {
+        buttonText = "Недоступно";
+    }
+    else {
+        buttonText = inCart ? "Удалить из корзины" : "Купить";
+    }
+    
     const cardModalView = new CardModal(cloneTemplate(cardPreviewTemplate), {
         onToggleCart: () => {
             events.emit("card:buy", item);
@@ -183,8 +190,7 @@ events.on("catalog:selectItem", (item: IProduct) => {
 
     modalView.content = cardModalView.render({
         item: item,
-        isInCart: inCart,
-        price: item.price,
+        buttonText: buttonText,
     });
     modalView.open();
 });

@@ -1,4 +1,4 @@
-import { IProduct } from "../../../types";
+import { IProduct, TPrice } from "../../../types";
 import { categoryMap } from "../../../utils/constants";
 import { ensureElement } from "../../../utils/utils";
 import { Card } from "./Card";
@@ -10,9 +10,8 @@ export interface ICardModalActions {
 }
 
 interface ICartModal {
-    item: Partial<IProduct>;
-    isInCart: boolean;
-    price: number | null;
+    item: Partial<IProduct> ;
+    buttonText: string;
 }
 
 export class CardModal extends Card<ICartModal> {
@@ -79,7 +78,7 @@ export class CardModal extends Card<ICartModal> {
         }
     }
 
-    set isInCart(value: boolean) {
-        this._button.textContent = value ? "Удалить из корзины" : "Купить";
+    set buttonText(buttonText: string) {
+        this._button.textContent = buttonText;
     }
 }

@@ -17,7 +17,7 @@ export class Customer {
         this.events = events;
     }
 
-    setData(data: Partial<ICustomer>) {
+    setData(data: Partial<ICustomer>): void {
         if (data.payment) {
             this.payment = data.payment;
             this.events.emit("checkout:orderUpdated");

@@ -1,3 +1,4 @@
+import { TPrice } from "../../../types";
 import { ensureElement } from "../../../utils/utils";
 import { Component } from "../../base/Component";
 
@@ -22,7 +23,7 @@ export abstract class Card<T> extends Component<T> {
         this._title.textContent = value;
     }
 
-    set price(value: number | null) {
+    set price(value: TPrice) {
         if (value === null) {
             this._price.textContent = "Бесценно";
         } else {
