@@ -26,6 +26,7 @@ export class ShoppingCart {
 
     clear(): void {
         this.items = [];
+        this.events.emit('cart:updated');
     }
 
     getTotalPrice(): number {

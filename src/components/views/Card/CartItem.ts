@@ -15,7 +15,6 @@ export class CartItem extends Card<ICartItem>{
   public readonly container: HTMLElement;
   private indexEl: HTMLElement;
   private removeBtn: HTMLButtonElement;
-  private _id?: string;
 
   constructor(container: HTMLElement, actions?: ICartItemActions) {
     super(container);
@@ -34,6 +33,4 @@ export class CartItem extends Card<ICartItem>{
   set index(i: number) {
     this.indexEl.textContent = String(i);
   }
-
-  set id(v: string) { this._id = v; }
 }

@@ -15,7 +15,8 @@ import { CardModal } from "./components/views/Card/CardModal";
 import { Cart } from "./components/views/Cart";
 import { CartItem } from "./components/views/Card/CartItem";
 import { Header } from "./components/views/Header";
-import { IProduct } from "./types";
+import { IOrder, IProduct } from "./types";
+import { ContactsView, OrderSuccessView, OrderView } from "./components/views/Checkout";
 
 export const events = new EventEmitter();
 
@@ -23,7 +24,6 @@ const catalog = new ProductCatalog(events);
 const cart = new ShoppingCart(events);
 const customer = new Customer(events);
 
-// Проверка api
 const manager = new NetworkManager(new Api(API_URL));
 
 manager
@@ -34,20 +34,6 @@ manager
         console.log("Каталог после получения с сервера:", catalog.getProducts());
     })
     .catch((err) => console.error("Ошибка при получении товаров", err));
-
-// const order: IOrder = {
-//     payment: "cash",
-//     address: customer.address,
-//     email: customer.email,
-//     phone: customer.phone,
-//     total: cart.getTotalPrice(),
-//     items: cart.getItems().map((item) => item.id),
-// };
-
-// manager
-//     .createOrder(order)
-//     .then((result) => console.log("Создан заказ:", result))
-//     .catch((err) => console.error("Ошибка при создании заказа", err));
 
 const gallery = new Gallery(ensureElement<HTMLElement>('.gallery'), events);
 const cardCatalogTemplate = ensureElement<HTMLTemplateElement>('#card-catalog');
@@ -69,8 +55,125 @@ const basketItemTemplate = ensureElement<HTMLTemplateElement>("#card-basket");
 const header = new Header(ensureElement<HTMLElement>(".header"));
 
 const cartView = new Cart(cloneTemplate(basketTemplate), {
-        onCheckout: () => events.emit("cart:checkout"),
+    onCheckout: () => events.emit("cart:checkout"),
+});
+
+const orderTmpl = ensureElement<HTMLTemplateElement>('#order');
+const contactsTmpl = ensureElement<HTMLTemplateElement>('#contacts');
+const successTmpl = ensureElement<HTMLTemplateElement>('#success');
+
+function openStep1() {
+  const view = new OrderView(cloneTemplate(orderTmpl), {
+    onSelectPayment: (payment) => {
+      customer.setPayment(payment);
+      syncStep1(view);
+    },
+    onAddressInput: (addr) => {
+      customer.setAddress(addr);
+      syncStep1(view);
+    },
+    onSubmit: () => {
+      const errors = [];
+      if (!customer.payment) errors.push('Не выбран вид оплаты');
+      if (!customer.address) errors.push('Укажите адрес доставки');
+      if (errors.length) {
+        view.setErrors(errors.join('. '));
+        syncStep1(view);
+        return;
+      }
+      openStep2();
+    },
+  });
+
+  view.setPayment(customer.payment);
+  view.setAddress(customer.address);
+  syncStep1(view);
+
+  modal.content = view.container;
+  modal.open();
+}
+
+function syncStep1(view: OrderView) {
+  const errors = [];
+  if (!customer.payment) errors.push('Не выбран вид оплаты');
+  if (!customer.address) errors.push('Укажите адрес доставки');
+
+  view.setErrors(errors.length ? errors.join('. ') : null);
+  view.setSubmitEnabled(errors.length === 0);
+}
+
+function openStep2() {
+  const view = new ContactsView(cloneTemplate(contactsTmpl), {
+    onEmailInput: (v) => {
+      customer.setEmail(v);
+      syncStep2(view);
+    },
+    onPhoneInput: (v) => {
+      customer.setPhone(v);
+      syncStep2(view);
+    },
+    onSubmit: () => {
+      submitOrder(view);
+    },
+  });
+
+  view.setEmail(customer.email);
+  view.setPhone(customer.phone);
+  syncStep2(view);
+
+  modal.content = view.container;
+  modal.open();
+}
+
+function syncStep2(view: ContactsView) {
+  const errs = customer.validateData();
+  const texts: string[] = [];
+  if (errs.email) texts.push(errs.email);
+  if (errs.phone) texts.push(errs.phone);
+
+  view.setErrors(texts.length ? texts.join('. ') : null);
+  const ok = !errs.email && !errs.phone && !!customer.email && !!customer.phone;
+  view.setSubmitEnabled(ok);
+}
+
+function submitOrder(view: ContactsView) {
+  const errs = customer.validateData();
+  if (errs.email || errs.phone) {
+    syncStep2(view);
+    return;
+  }
+
+  const order: IOrder = {
+    payment: customer.payment!,                 // со step1
+    address: customer.address,                  // со step1
+    email: customer.email,                      // со step2
+    phone: customer.phone,                      // со step2
+    total: cart.getTotalPrice(),
+    items: cart.getItems().map((i) => i.id),
+  };
+
+  manager
+    .createOrder(order)
+    .then(() => {
+      const success = new OrderSuccessView(cloneTemplate(successTmpl), {
+        onClose: () => modal.close(),
+      });
+      success.setAmount(order.total);
+
+      modal.content = success.container;
+
+      cart.clear();
+      customer.clear();
+      const basketCounter = document.querySelector('.header__basket-counter');
+      if (basketCounter) basketCounter.textContent = '0';
+    })
+    .catch(() => {
+      view.setErrors('Не удалось оформить заказ, попробуйте позже');
     });
+}
+
+events.on('cart:checkout', () => openStep1());
+
 
 function renderCart(
   cartView: Cart,
@@ -150,3 +253,5 @@ events.on('cart:updated', () => {
 events.on('cart:removeItem', (item: IProduct) => {
     cart.removeItem(item);
 });
+
+events.on('cart:checkout', () => openStep1());
