@@ -6,15 +6,15 @@ interface IGallery {
 }
 
 export class Gallery extends Component<IGallery> {
-
-    constructor(container: HTMLElement, protected events: IEvents)
-    {
+    constructor(
+        container: HTMLElement,
+        protected events: IEvents,
+    ) {
         super(container);
     }
 
     set catalog(items: HTMLElement[]) {
         this.container.replaceChildren(...items);
-        this.events.emit('gallery:updated');
+        this.events.emit("gallery:updated");
     }
 }
-

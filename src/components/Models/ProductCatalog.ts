@@ -6,18 +6,18 @@ export class ProductCatalog {
     selectedProduct: IProduct | null = null;
 
     protected events: EventEmitter;
-    
+
     constructor(events: EventEmitter) {
         this.events = events;
     }
-    
+
     getProducts(): IProduct[] {
         return this.products;
     }
 
     setProducts(products: IProduct[]): void {
         this.products = products;
-        this.events.emit('catalog:changed');
+        this.events.emit("catalog:changed");
     }
 
     getProductById(id: string): IProduct | undefined {
@@ -26,7 +26,7 @@ export class ProductCatalog {
 
     setSelectedProduct(product: IProduct): void {
         this.selectedProduct = product;
-        this.events.emit('catalog:selectItem', product);
+        this.events.emit("catalog:selectItem", product);
     }
 
     getSelectedProduct(): IProduct | null {

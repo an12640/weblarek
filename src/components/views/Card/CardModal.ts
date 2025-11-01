@@ -1,4 +1,3 @@
-
 import { IProduct } from "../../../types";
 import { categoryMap } from "../../../utils/constants";
 import { ensureElement } from "../../../utils/utils";
@@ -7,13 +6,13 @@ import { Card } from "./Card";
 type CategoryKey = keyof typeof categoryMap;
 
 export interface ICardModalActions {
-  onToggleCart?: () => void;
+    onToggleCart?: () => void;
 }
 
 interface ICartModal {
     item: Partial<IProduct>;
     isInCart: boolean;
-    price : number | null
+    price: number | null;
 }
 
 export class CardModal extends Card<ICartModal> {
@@ -25,10 +24,22 @@ export class CardModal extends Card<ICartModal> {
     constructor(container: HTMLElement, actions?: ICardModalActions) {
         super(container);
 
-        this._category = ensureElement<HTMLElement>('.card__category', container);
-        this._image = ensureElement<HTMLImageElement>('.card__image', container);
-        this._description = ensureElement<HTMLElement>('.card__text', container);
-        this._button = ensureElement<HTMLButtonElement>('.card__button', container);
+        this._category = ensureElement<HTMLElement>(
+            ".card__category",
+            container,
+        );
+        this._image = ensureElement<HTMLImageElement>(
+            ".card__image",
+            container,
+        );
+        this._description = ensureElement<HTMLElement>(
+            ".card__text",
+            container,
+        );
+        this._button = ensureElement<HTMLButtonElement>(
+            ".card__button",
+            container,
+        );
 
         if (actions?.onToggleCart) {
             this._button.addEventListener("click", () => {
@@ -39,19 +50,19 @@ export class CardModal extends Card<ICartModal> {
 
     set category(value: string) {
         this._category.textContent = value;
-        
+
         for (const key in categoryMap) {
             this._category.classList.toggle(
                 categoryMap[key as CategoryKey],
-                key == value
+                key == value,
             );
         }
     }
 
     set image(value: string) {
-        this.setImage(this._image, value, this.title)
+        this.setImage(this._image, value, this.title);
     }
-    
+
     set description(value: string) {
         this._description.textContent = value;
     }
@@ -62,13 +73,13 @@ export class CardModal extends Card<ICartModal> {
         this.description = item.description!;
         this.price = item.price!;
         this.title = item.title!;
-        
+
         if (item.price === null) {
             this._button.disabled = true;
         }
     }
 
     set isInCart(value: boolean) {
-        this._button.textContent = value ? 'Удалить из корзины' : 'Купить';
+        this._button.textContent = value ? "Удалить из корзины" : "Купить";
     }
 }

@@ -2,10 +2,10 @@ import { ICustomer, TPayment } from "../../types";
 import { EventEmitter } from "../base/Events";
 
 export type TCustomerErrors = Partial<Record<keyof ICustomer, string>>;
-export type TOrderErrors = Pick<TCustomerErrors, 'payment' | 'address'>;
-export type TContactsErrors = Pick<TCustomerErrors, 'email' | 'phone'>;
+export type TOrderErrors = Pick<TCustomerErrors, "payment" | "address">;
+export type TContactsErrors = Pick<TCustomerErrors, "email" | "phone">;
 
-export class Customer {    
+export class Customer {
     payment: TPayment | null = null;
     address: string = "";
     email: string = "";
@@ -20,19 +20,19 @@ export class Customer {
     setData(data: Partial<ICustomer>) {
         if (data.payment) {
             this.payment = data.payment;
-            this.events.emit('checkout:orderUpdated');
+            this.events.emit("checkout:orderUpdated");
         }
         if (data.address) {
             this.address = data.address;
-            this.events.emit('checkout:orderUpdated');
+            this.events.emit("checkout:orderUpdated");
         }
         if (data.email) {
             this.email = data.email;
-            this.events.emit('checkout:contactsUpdated');
+            this.events.emit("checkout:contactsUpdated");
         }
         if (data.phone) {
             this.phone = data.phone;
-            this.events.emit('checkout:contactsUpdated');
+            this.events.emit("checkout:contactsUpdated");
         }
     }
 

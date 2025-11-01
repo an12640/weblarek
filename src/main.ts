@@ -91,39 +91,47 @@ function renderCart(cartView: Cart, cartItemTemplate: HTMLTemplateElement) {
 function renderCheckout() {
     const view = new Order(cloneTemplate(orderTmpl), {
         onSelectPayment: (payment: TPayment) => {
-            events.emit('checkout:updateForm', {payment});
+            events.emit("checkout:updateForm", { payment });
         },
         onAddressInput: (address) => {
-            events.emit('checkout:updateForm', {address});
+            events.emit("checkout:updateForm", { address });
         },
         onSubmit: () => {
-            events.emit('checkout:contacts');
+            events.emit("checkout:contacts");
         },
     });
 
-    modalView.content = view.render({payment: customer.payment, address: customer.address, errors: customer.validateOrder()});
+    modalView.content = view.render({
+        payment: customer.payment,
+        address: customer.address,
+        errors: customer.validateOrder(),
+    });
     modalView.open();
 }
 
 function renderContacts() {
     const view = new Contacts(cloneTemplate(contactsTmpl), {
         onEmailInput: (email) => {
-            events.emit('checkout:updateForm', {email});
+            events.emit("checkout:updateForm", { email });
         },
         onPhoneInput: (phone) => {
-            events.emit('checkout:updateForm', {phone});
+            events.emit("checkout:updateForm", { phone });
         },
         onSubmit: () => {
             events.emit("checkout:submit");
         },
     });
 
-    modalView.content = view.render({email: customer.email, phone: customer.phone, errors: customer.validateContacts()});
+    modalView.content = view.render({
+        email: customer.email,
+        phone: customer.phone,
+        errors: customer.validateContacts(),
+    });
+
     modalView.open();
 }
 
 function submitOrder() {
-
     const order: IOrder = {
         payment: customer.payment!,
         address: customer.address,
@@ -140,7 +148,7 @@ function submitOrder() {
                 onClose: () => modalView.close(),
             });
 
-            modalView.content = success.render({amount: order.total});
+            modalView.content = success.render({ amount: order.total });
 
             cart.clear();
             customer.clear();
@@ -166,17 +174,18 @@ events.on("catalog:changed", () => {
 events.on("catalog:selectItem", (item: IProduct) => {
     const inCart = cart.hasItem(item.id);
 
-    const cardModalView = new CardModal(
-        cloneTemplate(cardPreviewTemplate),
-        {
-            onToggleCart: () => {
-                events.emit("card:buy", item);
-                modalView.close();
-            },
+    const cardModalView = new CardModal(cloneTemplate(cardPreviewTemplate), {
+        onToggleCart: () => {
+            events.emit("card:buy", item);
+            modalView.close();
         },
-    );
-    
-    modalView.content = cardModalView.render({item:item, isInCart:inCart, price:item.price});
+    });
+
+    modalView.content = cardModalView.render({
+        item: item,
+        isInCart: inCart,
+        price: item.price,
+    });
     modalView.open();
 });
 
@@ -191,7 +200,7 @@ events.on("checkout:contactsUpdated", () => renderContacts());
 events.on("card:select", (item: IProduct) => catalog.setSelectedProduct(item));
 events.on("card:buy", (item: IProduct) => {
     const isInCart = cart.hasItem(item.id);
-    
+
     if (isInCart) {
         cart.removeItem(item);
     } else {
@@ -204,7 +213,7 @@ events.on("cart:removeItem", (item: IProduct) => {
 });
 
 events.on("cart:open", () => {
-    modalView.content = renderCart(cartView, cartItemTemplate);;
+    modalView.content = renderCart(cartView, cartItemTemplate);
     modalView.open();
 });
 

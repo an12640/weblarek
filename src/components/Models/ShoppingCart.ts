@@ -5,28 +5,28 @@ export class ShoppingCart {
     items: IProduct[] = [];
 
     protected events: EventEmitter;
-    
+
     constructor(events: EventEmitter) {
         this.events = events;
     }
-    
+
     getItems(): IProduct[] {
         return this.items;
     }
 
     addItem(product: IProduct): void {
         this.items.push(product);
-        this.events.emit('cart:updated');
+        this.events.emit("cart:updated");
     }
 
     removeItem(product: IProduct): void {
         this.items = this.items.filter((item) => item.id !== product.id);
-        this.events.emit('cart:updated');
+        this.events.emit("cart:updated");
     }
 
     clear(): void {
         this.items = [];
-        this.events.emit('cart:updated');
+        this.events.emit("cart:updated");
     }
 
     getTotalPrice(): number {

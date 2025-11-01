@@ -16,13 +16,16 @@ export class Modal extends Component<IModal> {
     constructor(container: HTMLElement, actions?: IModalActions) {
         super(container);
 
-        this.closeButton = ensureElement<HTMLButtonElement>('.modal__close');
-        this.modalContent = ensureElement<HTMLElement>('.modal__content');
+        this.closeButton = ensureElement<HTMLButtonElement>(".modal__close");
+        this.modalContent = ensureElement<HTMLElement>(".modal__content");
 
         if (actions?.onClose) {
-            this.closeButton.addEventListener('click', actions.onClose);
-            this.container.addEventListener('click', (event) => {
-                if (event.target === event.currentTarget && actions.onClose != undefined) {
+            this.closeButton.addEventListener("click", actions.onClose);
+            this.container.addEventListener("click", (event) => {
+                if (
+                    event.target === event.currentTarget &&
+                    actions.onClose != undefined
+                ) {
                     actions.onClose();
                 }
             });
@@ -34,11 +37,10 @@ export class Modal extends Component<IModal> {
     }
 
     open(): void {
-        this.container.classList.add('modal_active');
+        this.container.classList.add("modal_active");
     }
 
     close(): void {
-        this.container.classList.remove('modal_active');
+        this.container.classList.remove("modal_active");
     }
 }
-
