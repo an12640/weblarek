@@ -1,13 +1,8 @@
 import { TPayment } from "../../../types";
 import { ensureElement } from "../../../utils/utils";
-import { Component } from "../../base/Component";
+import { IEvents } from "../../base/Events";
 import { TOrderErrors } from "../../models/Customer";
-
-export interface IOrderViewActions {
-    onSelectPayment?: (payment: TPayment) => void;
-    onAddressInput?: (value: string) => void;
-    onSubmit?: () => void;
-}
+import { Form } from "./Form";
 
 interface IOrder {
     payment: TPayment | null;
@@ -15,15 +10,13 @@ interface IOrder {
     errors: TOrderErrors;
 }
 
-export class Order extends Component<IOrder> {
+export class Order extends Form<IOrder> {
     protected btnCard: HTMLButtonElement; // name="card"
     protected btnCash: HTMLButtonElement; // name="cash"
     protected addressInput: HTMLInputElement; // name="address"
-    protected submitBtn: HTMLButtonElement; // .order__button
-    protected errorsEl: HTMLElement; // .form__errors
 
-    constructor(container: HTMLElement, actions?: IOrderViewActions) {
-        super(container);
+    constructor(container: HTMLElement, events: IEvents) {
+        super(container, events);
 
         this.btnCard = ensureElement<HTMLButtonElement>(
             'button[name="card"]',
@@ -37,27 +30,19 @@ export class Order extends Component<IOrder> {
             'input[name="address"]',
             this.container,
         );
-        this.submitBtn = ensureElement<HTMLButtonElement>(
-            ".order__button",
-            this.container,
-        );
-        this.errorsEl = ensureElement<HTMLElement>(
-            ".form__errors",
-            this.container,
-        );
 
         this.btnCard.addEventListener("click", () =>
-            actions?.onSelectPayment?.("card"),
+            this.events.emit("checkout:updateForm", { payment: "card" }),
         );
         this.btnCash.addEventListener("click", () =>
-            actions?.onSelectPayment?.("cash"),
+            this.events.emit("checkout:updateForm", { payment: "cash" }),
         );
-        this.addressInput.addEventListener("blur", () =>
-            actions?.onAddressInput?.(this.addressInput.value),
+        this.addressInput.addEventListener("input", () =>
+            this.events.emit("checkout:updateForm", { address: this.addressInput.value }),
         );
         this.container.addEventListener("submit", (e) => {
             e.preventDefault();
-            actions?.onSubmit?.();
+            events.emit("checkout:contacts");
         });
     }
 
@@ -68,20 +53,5 @@ export class Order extends Component<IOrder> {
 
     set address(value: string) {
         this.addressInput.value = value ?? "";
-    }
-
-    set errors(errors: TOrderErrors) {
-        if (Object.keys(errors).length === 0) {
-            this.setSubmitEnabled(true);
-        } else {
-            this.errorsEl.textContent = Object.values(errors)
-                .filter(Boolean)
-                .join(". ");
-            this.setSubmitEnabled(false);
-        }
-    }
-
-    private setSubmitEnabled(enabled: boolean) {
-        this.submitBtn.toggleAttribute("disabled", !enabled);
     }
 }

@@ -50,26 +50,14 @@ export class Customer {
         this.address = "";
         this.email = "";
         this.phone = "";
+        this.events.emit("checkout:orderUpdated");
+        this.events.emit("checkout:contactsUpdated");
     }
 
     validateData(): TCustomerErrors {
         const errors: TCustomerErrors = {};
         if (!this.payment) errors.payment = "Не выбран вид оплаты";
         if (!this.address) errors.address = "Укажите адрес доставки";
-        if (!this.email) errors.email = "Укажите email";
-        if (!this.phone) errors.phone = "Укажите телефон";
-        return errors;
-    }
-
-    validateOrder(): TOrderErrors {
-        const errors: TOrderErrors = {};
-        if (!this.payment) errors.payment = "Не выбран вид оплаты";
-        if (!this.address) errors.address = "Укажите адрес доставки";
-        return errors;
-    }
-
-    validateContacts(): TContactsErrors {
-        const errors: TContactsErrors = {};
         if (!this.email) errors.email = "Укажите email";
         if (!this.phone) errors.phone = "Укажите телефон";
         return errors;

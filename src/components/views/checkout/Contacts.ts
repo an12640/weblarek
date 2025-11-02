@@ -1,12 +1,7 @@
 import { ensureElement } from "../../../utils/utils";
-import { Component } from "../../base/Component";
+import { IEvents } from "../../base/Events";
 import { TContactsErrors } from "../../models/Customer";
-
-export interface IContactsActions {
-    onEmailInput?: (value: string) => void;
-    onPhoneInput?: (value: string) => void;
-    onSubmit?: () => void;
-}
+import { Form } from "./Form";
 
 interface IContacts {
     email: string;
@@ -14,14 +9,12 @@ interface IContacts {
     errors: TContactsErrors;
 }
 
-export class Contacts extends Component<IContacts> {
+export class Contacts extends Form<IContacts> {
     protected emailInput: HTMLInputElement; // name="email"
     protected phoneInput: HTMLInputElement; // name="phone"
-    protected submitBtn: HTMLButtonElement; // .button (внизу)
-    protected errorsEl: HTMLElement; // .form__errors
 
-    constructor(container: HTMLElement, actions?: IContactsActions) {
-        super(container);
+    constructor(container: HTMLElement, events: IEvents) {
+        super(container, events);
 
         this.emailInput = ensureElement<HTMLInputElement>(
             'input[name="email"]',
@@ -31,25 +24,13 @@ export class Contacts extends Component<IContacts> {
             'input[name="phone"]',
             this.container,
         );
-        this.submitBtn = ensureElement<HTMLButtonElement>(
-            ".modal__actions .button",
-            this.container,
-        );
-        this.errorsEl = ensureElement<HTMLElement>(
-            ".form__errors",
-            this.container,
-        );
 
-        this.emailInput.addEventListener("blur", () =>
-            actions?.onEmailInput?.(this.emailInput.value),
+        this.emailInput.addEventListener("input", () =>
+            this.events.emit("checkout:updateForm", { email: this.emailInput.value })
         );
-        this.phoneInput.addEventListener("blur", () =>
-            actions?.onPhoneInput?.(this.phoneInput.value),
+        this.phoneInput.addEventListener("input", () =>
+            this.events.emit("checkout:updateForm", { phone: this.phoneInput.value }),
         );
-        this.container.addEventListener("submit", (e) => {
-            e.preventDefault();
-            actions?.onSubmit?.();
-        });
     }
 
     set email(value: string) {
@@ -58,20 +39,5 @@ export class Contacts extends Component<IContacts> {
 
     set phone(value: string) {
         this.phoneInput.value = value ?? "";
-    }
-
-    set errors(errors: TContactsErrors) {
-        if (Object.keys(errors).length === 0) {
-            this.setSubmitEnabled(true);
-        } else {
-            this.errorsEl.textContent = Object.values(errors)
-                .filter(Boolean)
-                .join(". ");
-            this.setSubmitEnabled(false);
-        }
-    }
-
-    private setSubmitEnabled(enabled: boolean) {
-        this.submitBtn.toggleAttribute("disabled", !enabled);
     }
 }
